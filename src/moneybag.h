@@ -74,11 +74,21 @@ public:
         denier_num *other;
         return *this;
     }
-    auto operator<=>(Moneybag other)
+    std::partial_ordering operator<=>(Moneybag other)
     {
-        __uint128_t uno = 240 * livre_num + 20 * solidus_num + denier_num;
-        __uint128_t dos = 240 * other.livre_number() + 20 * other.solidus_number() + other.denier_number();
-        return uno <=> dos;
+        if (livre_num == other.livre_number() && solidus_num == other.solidus_number() && denier_num == other.denier_number())
+        {
+            return std::partial_ordering::equivalent;
+        }
+        if (livre_num <= other.livre_number() && solidus_num <= other.solidus_number() && denier_num <= other.denier_number())
+        {
+            return std::partial_ordering::less;
+        }
+        if (livre_num >= other.livre_number() && solidus_num >= other.solidus_number() && denier_num >= other.denier_number())
+        {
+            return std::partial_ordering::greater;
+        }
+        return std::partial_ordering::unordered;
     }
     bool operator==(Moneybag other)
     {
