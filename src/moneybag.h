@@ -13,8 +13,8 @@ public:
     Moneybag(coin_number_t livre, coin_number_t solidus, coin_number_t dinar)
     {
         livre_num = livre;
-        denier_num = dinar;
         solidus_num = solidus;
+        denier_num = dinar;
     }
     Moneybag &operator=(Moneybag other)
     {
@@ -26,8 +26,8 @@ public:
     Moneybag(const Moneybag &other)
     {
         livre_num = other.livre_number();
-        denier_num = other.solidus_number();
-        solidus_num = other.denier_number();
+        solidus_num = other.solidus_number();
+        denier_num = other.denier_number();
     }
     Moneybag operator+(Moneybag other)
     {
@@ -93,8 +93,8 @@ public:
                (solidus_num > 0);
     }
     constexpr coin_number_t livre_number() const { return livre_num; };
-    constexpr coin_number_t denier_number() const { return denier_num; };
     constexpr coin_number_t solidus_number() const { return solidus_num; };
+    constexpr coin_number_t denier_number() const { return denier_num; };
 
 private:
     uint64_t livre_num;
@@ -163,6 +163,7 @@ std::ostream &operator<<(std::ostream &os, Moneybag bag)
         livre_s = "livr";
     }
     livre_s = std::to_string(livre_n) + " " + livre_s;
+
     std::string solidus_s = "soliduses";
     Moneybag::coin_number_t solidus_n = bag.solidus_number();
     if (solidus_n == 1)
@@ -170,6 +171,7 @@ std::ostream &operator<<(std::ostream &os, Moneybag bag)
         solidus_s = "solidus";
     }
     solidus_s = std::to_string(solidus_n) + " " + solidus_s;
+
     std::string denier_s = "deniers";
     Moneybag::coin_number_t denier_n = bag.denier_number();
     if (denier_n == 1)
@@ -227,6 +229,9 @@ public:
 private:
     __uint128_t v;
 };
+
+constexpr Value::Value()
+    : v(0) {}
 
 constexpr Value::Value(const Moneybag &moneybag)
     : v(moneybag.livre_number() * 240 +
