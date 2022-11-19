@@ -1,10 +1,9 @@
 #ifndef MONEYBAG_H
 #define MONEYBAG_H
 #include <cstdint>
-// #include <compare>
+#include <compare>
 #include <string>
 
-/* Phantom class, for compilation & testing only*/
 class Moneybag
 {
 private:
@@ -13,25 +12,39 @@ private:
     uint64_t solidus_num;
 
 public:
-    Moneybag(uint64_t livre, uint64_t solidus, uint64_t dinar)
+    using coin_number_t = uint64_t;
+    Moneybag(coin_number_t livre, coin_number_t solidus, coin_number_t dinar)
     {
         livre_num = livre;
         denier_num = dinar;
         solidus_num = solidus;
     }
-    Moneybag operator+(Moneybag other)
+    Moneybag &operator=(Moneybag other)
+    {
+        livre_num = other.livre_number();
+        solidus_num = other.solidus_number();
+        denier_num = other.denier_number();
+        return *this;
+    }
+    Moneybag(const Moneybag& other)
+    {
+        livre_num = other.livre_number();
+        denier_num = other.solidus_number();
+        solidus_num = other.denier_number();
+    }
+    Moneybag operator+(Moneybag other) const
     {
         return Moneybag(livre_num + other.livre_number(),
                         solidus_num + other.solidus_number(),
                         denier_num + other.denier_number());
     }
-    Moneybag operator-(Moneybag other)
+    Moneybag operator-(Moneybag other) const
     {
         return Moneybag(livre_num - other.livre_number(),
                         solidus_num - other.solidus_number(),
                         denier_num - other.denier_number());
     }
-    Moneybag operator*(uint64_t other)
+    Moneybag operator*(coin_number_t other) const
     {
         return Moneybag(livre_num * other,
                         solidus_num * other,
@@ -51,12 +64,18 @@ public:
         denier_num - other.denier_number();
         return *this;
     }
-    Moneybag &operator*=(uint64_t other)
+    Moneybag &operator*=(coin_number_t other)
     {
         livre_num *other;
         solidus_num *other;
         denier_num *other;
         return *this;
+    }
+    auto operator<=>(Moneybag other)
+    {
+        __uint128_t uno = 240 * livre_num + 20 * solidus_num + denier_num;
+        __uint128_t dos = 240 * other.livre_number() + 20 * other.solidus_number() + other.denier_number();
+        return uno <=> dos;
     }
     bool operator==(Moneybag other)
     {
@@ -70,14 +89,53 @@ public:
                (denier_num > 0) &&
                (solidus_num > 0);
     }
-    constexpr uint64_t livre_number() const { return livre_num; };
-    constexpr uint64_t denier_number() const { return denier_num; };
-    constexpr uint64_t solidus_number() const { return solidus_num; };
+    constexpr coin_number_t livre_number() const { return livre_num; };
+    constexpr coin_number_t denier_number() const { return denier_num; };
+    constexpr coin_number_t solidus_number() const { return solidus_num; };
 };
+
+Moneybag operator*(Moneybag::coin_number_t other, Moneybag bag)
+{
+    return Moneybag(bag.livre_number() * other,
+                    bag.solidus_number() * other,
+                    bag.denier_number() * other);
+}
+
+std::ostream &operator<<(std::ostream &os, Moneybag bag)
+{
+    std::string livre_s = "livres";
+    Moneybag::coin_number_t livre_n = bag.livre_number();
+    if (livre_n == 1)
+    {
+        livre_s = "livr";
+    }
+    livre_s = std::to_string(livre_n) + " " + livre_s;
+    std::string solidus_s = "soliduses";
+    Moneybag::coin_number_t solidus_n = bag.solidus_number();
+    if (solidus_n == 1)
+    {
+        solidus_s = "solidus";
+    }
+    solidus_s = std::to_string(solidus_n) + " " + solidus_s;
+    std::string denier_s = "deniers";
+    Moneybag::coin_number_t denier_n = bag.denier_number();
+    if (denier_n == 1)
+    {
+        denier_s = "denier";
+    }
+    denier_s = std::to_string(denier_n) + " " + denier_s;
+    os << "(" + livre_s + " ," + solidus_s + " ," + denier_s + ")";
+    return os;
+}
+
+const Moneybag Livre(1, 0, 0);
+const Moneybag Solidus(0, 1, 0);
+const Moneybag Denier(0, 0, 1);
 
 class Value
 {
 public:
+    constexpr Value();
     constexpr Value(const Moneybag &moneybag);
     constexpr Value(uint64_t n);
     constexpr Value(const Value &val);

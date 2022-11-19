@@ -4,7 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/include/c++/9",
+                "/usr/include/c++/10",
                 "/usr/include/x86_64-linux-gnu/c++/9",
                 "/usr/include/c++/9/backward",
                 "/usr/lib/gcc/x86_64-linux-gnu/9/include",
@@ -14,10 +14,16 @@
                 "/usr/include/linux"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
-            "cStandard": "gnu17",
-            "cppStandard": "gnu++14",
-            "intelliSenseMode": "linux-gcc-x64"
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c17",
+            "cppStandard": "gnu++20",
+            "intelliSenseMode": "gcc-x64",
+            "compilerArgs": [
+                "Wall",
+                "Wextra ",
+                "O2 ",
+                "std=c++20"
+            ]
         }
     ],
     "version": 4
