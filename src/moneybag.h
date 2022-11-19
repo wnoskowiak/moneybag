@@ -2,14 +2,11 @@
 #define MONEYBAG_H
 #include <cstdint>
 #include <compare>
+#include <stdexcept>
 #include <string>
 
 class Moneybag
 {
-private:
-    uint64_t livre_num;
-    uint64_t denier_num;
-    uint64_t solidus_num;
 
 public:
     using coin_number_t = uint64_t;
@@ -26,39 +23,44 @@ public:
         denier_num = other.denier_number();
         return *this;
     }
-    Moneybag(const Moneybag& other)
+    Moneybag(const Moneybag &other)
     {
         livre_num = other.livre_number();
         denier_num = other.solidus_number();
         solidus_num = other.denier_number();
     }
-    Moneybag operator+(Moneybag other) const
+    Moneybag operator+(Moneybag other)
     {
+        check_add(other);
         return Moneybag(livre_num + other.livre_number(),
                         solidus_num + other.solidus_number(),
                         denier_num + other.denier_number());
     }
-    Moneybag operator-(Moneybag other) const
+    Moneybag operator-(Moneybag other)
     {
+        check_sub(other);
         return Moneybag(livre_num - other.livre_number(),
                         solidus_num - other.solidus_number(),
                         denier_num - other.denier_number());
     }
-    Moneybag operator*(coin_number_t other) const
+    Moneybag operator*(coin_number_t other)
     {
+        check_mult(other);
         return Moneybag(livre_num * other,
                         solidus_num * other,
                         denier_num * other);
     }
     Moneybag &operator+=(Moneybag other)
     {
-        livre_num + other.livre_number();
-        solidus_num + other.solidus_number();
-        denier_num + other.denier_number();
+        check_add(other);
+        livre_num = livre_num + other.livre_number();
+        solidus_num = solidus_num + other.solidus_number();
+        denier_num = denier_num + other.denier_number();
         return *this;
     }
     Moneybag &operator-=(Moneybag other)
     {
+        check_sub(other);
         livre_num - other.livre_number();
         solidus_num - other.solidus_number();
         denier_num - other.denier_number();
@@ -66,6 +68,7 @@ public:
     }
     Moneybag &operator*=(coin_number_t other)
     {
+        check_mult(other);
         livre_num *other;
         solidus_num *other;
         denier_num *other;
@@ -92,6 +95,56 @@ public:
     constexpr coin_number_t livre_number() const { return livre_num; };
     constexpr coin_number_t denier_number() const { return denier_num; };
     constexpr coin_number_t solidus_number() const { return solidus_num; };
+
+private:
+    uint64_t livre_num;
+    uint64_t denier_num;
+    uint64_t solidus_num;
+    void check_add(Moneybag other)
+    {
+        if (livre_num > UINT64_MAX - other.livre_number())
+        {
+            throw std::out_of_range("too many livres");
+        }
+        if (solidus_num > UINT64_MAX - other.solidus_number())
+        {
+            throw std::out_of_range("too many soliduses");
+        }
+        if (denier_num > UINT64_MAX - other.denier_number())
+        {
+            throw std::out_of_range("too many denieres");
+        }
+    }
+    void check_sub(Moneybag other)
+    {
+        if (livre_num < other.livre_number())
+        {
+            throw std::out_of_range("too few livres");
+        }
+        if (solidus_num < other.solidus_number())
+        {
+            throw std::out_of_range("too few soliduses");
+        }
+        if (denier_num < other.denier_number())
+        {
+            throw std::out_of_range("too few denieres");
+        }
+    }
+    void check_mult(coin_number_t other)
+    {
+        if (livre_num > UINT64_MAX / other)
+        {
+            throw std::out_of_range("too many livres");
+        }
+        if (solidus_num > UINT64_MAX / other)
+        {
+            throw std::out_of_range("too many soliduses");
+        }
+        if (denier_num > UINT64_MAX / other)
+        {
+            throw std::out_of_range("too many denieres");
+        }
+    }
 };
 
 Moneybag operator*(Moneybag::coin_number_t other, Moneybag bag)
